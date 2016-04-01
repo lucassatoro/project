@@ -1,0 +1,170 @@
+Bem a começo EU fiz desta forma
+
+lucas@lucas-NH4CU53:~/laravel$laravel new project
+
+Bem pulando o inicio fiz assim.
+
+Primeiro editei meu banco de dados.
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=criandocode
+DB_USERNAME=root
+DB_PASSWORD=root
+
+Depois criei o meu Model Client: enfim fiz as alterações corretas nos dois na prmeira Migration Client..
+ 
+ public function up()
+    {
+        Schema::create('clients', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('responsible');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('address');
+            $table->string('obs');
+
+            $table->timestamps();
+        });
+
+        No Model Client:
+
+        ?php
+
+namespace codeprojeto;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Client extends Model
+{
+    protected $fillable =  [
+
+        'name',
+        'responsible',
+        'email',
+        'phone',
+        'address',
+        'obs'
+
+
+    ];
+}
+
+Na minha ModelFactory.. fiz um seguinte
+
+
+Sempre lembrando, de enviar esta migração ao banco de dados e utilizar o console tinker para
+configurar esta operação.
+
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Model Factories
+|--------------------------------------------------------------------------
+|
+| Here you may define all of your model factories. Model factories give
+| you a convenient way to create models for testing and seeding your
+| database. Just tell the factory how a default model should look.
+|
+*/
+
+$factory->define(codeprojeto\User::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->safeEmail,
+        'password' => bcrypt(str_random(10)),
+        'remember_token' => str_random(10),
+    ];
+});
+
+$factory->define(codeprojeto\Client::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->name,
+        'responsible' => $faker->name,
+        'email' => $faker->email,
+        'phone' => $faker->phoneNumber,
+        'address' => $faker->address,
+        'obs' => $faker->sentence,
+
+    ];
+});
+
+
+Criei um Controller .. e fiz um seguinte:
+<?php
+
+namespace codeprojeto\Http\Controllers;
+
+use codeprojeto\Client;
+use Illuminate\Http\Request;
+
+use codeprojeto\Http\Requests;
+
+class ClientController extends Controller
+
+
+{
+    public function index()
+
+    {
+        return \codeprojeto\Client::all();
+    }
+
+
+    public function store(Request $request)
+
+
+    {
+        return \codeprojeto\Client::create($request->all());
+    }
+
+
+    public function show($id)
+    {
+        return Client::find($id);
+    }
+
+
+
+
+    public function destroy ($id)
+
+
+    {
+
+        Client::find($id)->delete();
+    }
+
+    Nas minhas Routes.
+
+    <?php
+
+/*
+|--------------------------------------------------------------------------
+| Application Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register all of the routes for an application.
+| It's a breeze. Simply tell Laravel the URIs it should respond to
+| and give it the controller to call when that URI is requested.
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('client','ClientController@index');
+Route::post('client','ClientController@store');
+Route::get('client/{id}','ClientController@show');
+Route::delete('client','ClientController@destroy');
+
+
+Criei O meu CRUD com duas informações, o Metodo Get e o Metodo Post.
+
+
+Na minha aplicação deu um erro de Kernel mas resolvi adicionando a linha de comando 
+'csrf' => \codeprojeto\Http\Middleware\VerifyCsrfToken::class,
+
+e resolvido esta foi a minha trajetoria.
